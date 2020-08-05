@@ -394,6 +394,7 @@ dcl-ds il_request qualified template;
     parameterList    pointer;
     resourceSegments pointer;
     threadLocal      pointer;
+    routeId          varchar(256);
 end-ds;
 
 ///
@@ -752,13 +753,15 @@ dcl-c IL_ANY     const(1023);
 //        IL_GET + IL_POST, default: IL_ANY)
 // @param Path (default: / )
 // @param Content type (default: application/json)
+// @param Route Id
 ///
 dcl-pr il_addRoute extproc(*CWIDEN:'il_addRoute');
     config       likeds(il_config);
     servlet      pointer(*PROC) value;
     httpMethods  int(5) value options(*nopass);
-    route        varchar(1024) const options(*nopass);
-    contentType  varchar(1024) const options(*nopass);
+    route        varchar(1024) const options(*omit : *nopass);
+    contentType  varchar(1024) const options(*omit : *nopass);
+    routeId      varchar(256) const options(*nopass);
 end-pr;
 
 ///

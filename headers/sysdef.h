@@ -91,6 +91,7 @@ typedef _Packed struct _REQUEST  {
     PSLIST      parmList;
     PSLIST      resourceSegments;
     PVOID       threadMem;
+    VARCHAR256  routeId;
 } REQUEST , *PREQUEST;
 
 typedef _Packed struct _RESPONSE  {
@@ -133,6 +134,7 @@ typedef struct _ROUTING  {
     regex_t *  routeReg;
     regex_t *  contentReg;
     SERVLET servlet;
+    VARCHAR256 routeId;
 } ROUTING, * PROUTING;
 
 #pragma enum     (2)
@@ -156,7 +158,7 @@ void putHeader (PRESPONSE pResponse);
 void putChunkXlate (PRESPONSE pResponse, PUCHAR buf, LONG len);
 int socketWait (int sd , int sec);
 PUCHAR getHeaderValue(PUCHAR  value, PSLIST headerList ,  PUCHAR key);
-SERVLET findRoute(PCONFIG pConfig, PREQUEST pRequest);
+PROUTING findRoute(PCONFIG pConfig, PREQUEST pRequest);
 BOOL httpMethodMatchesEndPoint(PLVARPUCHAR requestMethod, ROUTETYPE endPointRouteType);
 void handleServletException(_INTRPT_Hndlr_Parms_T * __ptr128 parms);
 BOOL fcgiReceiveHeader (PREQUEST pRequest);

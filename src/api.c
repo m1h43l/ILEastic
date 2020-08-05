@@ -322,7 +322,7 @@ PVOID il_getThreadMem  (PREQUEST pRequest)
     Handle :
     il_addRoute  (config : myServives: IL_ANY : '^/services/' : '(application/json)|(text/json)');
 \* --------------------------------------------------------------------------- */
-void il_addRoute (PCONFIG pConfig, SERVLET servlet, ROUTETYPE routeType , PVARCHAR routeReg , PVARCHAR contentReg )
+void il_addRoute (PCONFIG pConfig, SERVLET servlet, ROUTETYPE routeType , PVARCHAR routeReg , PVARCHAR contentReg , PVARCHAR routeId)
 {
     PNPMPARMLISTADDRP pParms = _NPMPARMLISTADDR();
     LONG rc;
@@ -338,6 +338,10 @@ void il_addRoute (PCONFIG pConfig, SERVLET servlet, ROUTETYPE routeType , PVARCH
     routing.contentReg = NULL;
     routing.servlet    = servlet;
     routing.routeType  = pParms->OpDescList->NbrOfParms >= 3 ? routeType : IL_ANY;
+    if (pParms->OpDescList->NbrOfParms >= 6) {
+      routing.routeId.Length = routeId->Length;
+      memcpy(routing.routeId.String, routeId->String, routeId->Length <= 256 ? routeId->Length : 256);
+    }
 
     if (pParms->OpDescList->NbrOfParms >= 4) {
         routing.routeReg   = malloc(sizeof(regex_t));
@@ -349,7 +353,7 @@ void il_addRoute (PCONFIG pConfig, SERVLET servlet, ROUTETYPE routeType , PVARCH
         }
     }
 
-    if (pParms->OpDescList->NbrOfParms >= 5) {
+    if (pParms->OpDescList->NbrOfParms >= 5 && contentReg != NULL) {
         routing.contentReg = malloc(sizeof(regex_t));
         rc = regcomp(routing.contentReg, vc2str(contentReg) , options );
         if (rc) {
