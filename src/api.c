@@ -21,6 +21,8 @@
 #include <string.h>
 #include <decimal.h>
 #include <fcntl.h>
+#include <locale.h>
+#include <regex.h>
 
 
 /* in qsysinc library */
@@ -319,6 +321,42 @@ PVOID il_getThreadMem  (PREQUEST pRequest)
     return pRequest->threadMem;
 }
 /* --------------------------------------------------------------------------- *\
+\* --------------------------------------------------------------------------- */
+static parserRouting (PROUTING pRouting , PUCHAR finalExpr , PUCHAR routeReg) 
+{
+    pRouting -> parmNumbers =0;
+    // pickup parameter and replace the paramter name with regex for capture groupe
+    while (*routeReg) {
+        if (*routeReg == '{') {
+            PUCHAR end = strchr(++routeReg , '}');
+            PUCHAR name; 
+            int len;
+            if (end == NULL) return;
+            len = end - routeReg;  
+            name =  malloc ( len + 1 );
+            substr( name ,routeReg , len);
+            pRouting -> parmNames [pRouting -> parmNumbers ++] = name;
+            routeReg = end +1;
+            finalExpr += cpy(finalExpr, "(.*)");
+        } else {
+            *(finalExpr++) = *(routeReg++);
+        }
+    }
+    *(finalExpr++) = '\0';
+}
+/* --------------------------------------------------------------------------- *\
+    Setup the local top be POSIX i.e. the charset in ccsid(37) 
+\* --------------------------------------------------------------------------- */
+static void initialize(void)
+{
+    static BOOL initialized;
+
+    if (initialized) return;
+    initialized = true;
+
+    setlocale(LC_CTYPE , "POSIX"); 
+}
+/* --------------------------------------------------------------------------- *\
     Handle :
     il_addRoute  (config : myServives: IL_ANY : '^/services/' : '(application/json)|(text/json)');
 \* --------------------------------------------------------------------------- */
@@ -327,8 +365,11 @@ void il_addRoute (PCONFIG pConfig, SERVLET servlet, ROUTETYPE routeType , PVARCH
     PNPMPARMLISTADDRP pParms = _NPMPARMLISTADDR();
     LONG rc;
     UCHAR msg  [100];
-    ULONG options =  REG_NOSUB + REG_EXTENDED;
+    UCHAR finalExpr [32000];
+    ULONG options = REG_EXTENDED;
     ROUTING routing;
+
+    initialize();
 
     if (pConfig->router == NULL) {
         pConfig->router = sList_new ();
@@ -341,7 +382,8 @@ void il_addRoute (PCONFIG pConfig, SERVLET servlet, ROUTETYPE routeType , PVARCH
 
     if (pParms->OpDescList->NbrOfParms >= 4) {
         routing.routeReg   = malloc(sizeof(regex_t));
-        rc = regcomp(routing.routeReg, vc2str(routeReg) , options );
+        parserRouting (&routing , finalExpr , vc2str(routeReg));
+        rc = regcomp(routing.routeReg, finalExpr , REG_EXTENDED );
         if (rc) {
             regerror(rc, routing.routeReg  , msg , 100);
             il_joblog( "Could not compile regex %s for routing. reason : %s " , vc2str(routeReg) , msg);
@@ -351,7 +393,7 @@ void il_addRoute (PCONFIG pConfig, SERVLET servlet, ROUTETYPE routeType , PVARCH
 
     if (pParms->OpDescList->NbrOfParms >= 5) {
         routing.contentReg = malloc(sizeof(regex_t));
-        rc = regcomp(routing.contentReg, vc2str(contentReg) , options );
+        rc = regcomp(routing.contentReg, vc2str(contentReg) , REG_NOSUB + REG_EXTENDED );
         if (rc) {
             regerror(rc, routing.contentReg  , msg , 100);
             il_joblog( "Could not compile regex %s for content type. reason : %s " , vc2str(contentReg) , msg);

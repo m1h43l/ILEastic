@@ -91,6 +91,7 @@ typedef _Packed struct _REQUEST  {
     PSLIST      parmList;
     PSLIST      resourceSegments;
     PVOID       threadMem;
+    PVOID       pRouting; // Not able to make cyclic defentions :(    
 } REQUEST , *PREQUEST;
 
 typedef _Packed struct _RESPONSE  {
@@ -133,6 +134,9 @@ typedef struct _ROUTING  {
     regex_t *  routeReg;
     regex_t *  contentReg;
     SERVLET servlet;
+    int    parmNumbers;
+    PUCHAR parmNames [256];
+    PUCHAR parmValue [256];
 } ROUTING, * PROUTING;
 
 #pragma enum     (2)
