@@ -10,9 +10,11 @@
 # (make clean).
 BIN_LIB=ILEASTIC
 LIBLIST=$(BIN_LIB)
-TARGET_RLS=V7R2M0
+TARGET_RLS=*CURRENT
 
 BIND_LIB=*LIBL
+
+NOXDB2_LIB=NOXDB2
 
 # The shell we use
 SHELL=/QOpenSys/usr/bin/qsh
@@ -49,9 +51,6 @@ env:
 compile: .PHONY
 	cd src && /QOpenSys/pkgs/bin/gmake BIN_LIB=$(BIN_LIB) TARGET_RLS=$(TARGET_RLS)
 
-noxDB: .PHONY
-	cd noxDB && /QOpenSys/pkgs/bin/gmake BIN_LIB=$(BIN_LIB) TARGET_RLS=$(TARGET_RLS)
-
 ILEfastCGI: .PHONY
 	cd ILEfastCGI && /QOpenSys/pkgs/bin/gmake BIN_LIB=$(BIN_LIB) TARGET_RLS=$(TARGET_RLS)
 
@@ -62,7 +61,7 @@ bind:
 	system "CRTSRCPF FILE($(BIN_LIB)/QSRVSRC) RCDLEN(112)";\
 	system "CPYFRMSTMF FROMSTMF('headers/ileastic.bnd') TOMBR('/QSYS.lib/$(BIN_LIB).lib/QSRVSRC.file/ILEASTIC.mbr') MBROPT(*replace)";\
 	system -q "DLTOBJ OBJ($(BIN_LIB)/ILEASTIC) OBJTYPE(*SRVPGM)";\
-	system -kpieb "CRTSRVPGM SRVPGM($(BIN_LIB)/ILEASTIC) MODULE($(MODULES)) TGTRLS($(TARGET_RLS)) BNDSRVPGM(($(BIND_LIB)/ILEFASTCGI *DEFER) ($(BIND_LIB)/JSONXML *DEFER)) OPTION(*DUPPROC) DETAIL(*BASIC) STGMDL(*INHERIT) SRCFILE($(BIN_LIB)/QSRVSRC) TEXT('ILEastic - programable applicationserver for ILE')";
+	system -kpieb "CRTSRVPGM SRVPGM($(BIN_LIB)/ILEASTIC) MODULE($(MODULES)) TGTRLS($(TARGET_RLS)) BNDSRVPGM(($(BIND_LIB)/ILEFASTCGI *DEFER) ($(NOXDB2_LIB)/NOXDB2 *DEFER)) OPTION(*DUPPROC) DETAIL(*BASIC) STGMDL(*INHERIT) SRCFILE($(BIN_LIB)/QSRVSRC) TEXT('ILEastic - programable applicationserver for ILE')";
 
 
 clean:

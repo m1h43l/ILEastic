@@ -49,7 +49,7 @@
 #include "simpleList.h"
 #include "parms.h"
 #include "fcgi_stdio.h"
-#include "jsonxml.h"
+#include "noxDB2.h"
 
 
 // callback function pointers
@@ -687,7 +687,7 @@ static void cleanupTransaction (PREQUEST pRequest , PRESPONSE pResponse)
     sList_free (pResponse->headerList);
 
     if (pRequest->threadMem) {
-        jx_Close(pRequest->threadMem);
+        nox_Close(pRequest->threadMem);
     }
     if (pRequest->completeHeader.String) {
         free(pRequest->completeHeader.String);
@@ -723,7 +723,7 @@ static void * serverThread (PINSTANCE pInstance)
 
         pResponse = &response;
         
-        request.threadMem = (PVOID) jx_NewObject(NULL);
+        request.threadMem = (PVOID) nox_NewObject(NULL);
 
         #pragma exception_handler(handleServletException, pResponse, _C1_ALL, _C2_MH_ESCAPE, _CTLA_HANDLE)
         matchingRouting = findRoute(request.pConfig, &request);
