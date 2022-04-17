@@ -305,7 +305,7 @@ PSLIST parseResource(LVARPUCHAR resource)
     }
 
     PSLIST pResourceSegments = sList_new();
-    char * SLASH = "\x2f"; // "/" = 0x2f in UTF-8
+    char * l_SLASH = "\x2f"; // "/" = 0x2f in UTF-8
     
     int segmentIndex = 0;
     int segmentStart = -1;
@@ -315,7 +315,7 @@ PSLIST parseResource(LVARPUCHAR resource)
     LVARPUCHAR segment;
   
     for (i = 0; i <= resource.Length; i++) {
-      if (resource.String[i] == *SLASH || i == resource.Length) {
+      if (resource.String[i] == *l_SLASH || i == resource.Length) {
         if (segmentStart == -1) segmentStart = i;
         else if (segmentStart >= 0) {
           segment.Length = i - segmentStart - 1;
@@ -723,7 +723,7 @@ static void * serverThread (PINSTANCE pInstance)
 
         pResponse = &response;
         
-        request.threadMem = (PVOID) nox_NewObject(NULL);
+        request.threadMem = (PVOID) nox_NewObject();
 
         #pragma exception_handler(handleServletException, pResponse, _C1_ALL, _C2_MH_ESCAPE, _CTLA_HANDLE)
         matchingRouting = findRoute(request.pConfig, &request);
@@ -1004,4 +1004,3 @@ void il_listen (PCONFIG pConfig, SERVLET servlet)
 
     }
 }
-
